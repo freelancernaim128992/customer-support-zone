@@ -16,54 +16,55 @@ function App() {
   const [inProgressCount, setInProgressCount] = useState(0)
   const [resolvedCount, setResolvedCount] = useState(0)
 
-  const handleAddToTask = (ticket) => {
-    if (!taskStatus.find(t => t.id === ticket.id)) {
-      setTaskStatus([...taskStatus, ticket])
+  // TicketCard এ ক্লিক করলে
+  const handleCardClick = (clickedTicket) => {
+    // 1. TicketCard এর status আপডেট করি (Open → In Progress)
+    const updatedTickets = tickets.map(ticket =>
+      ticket.id === clickedTicket.id
+        ? { ...ticket, status: 'in-progress' }
+        : ticket
+    )
+    setTickets(updatedTickets)
+
+    // 2. TaskStatus এ যোগ করি (কমপ্লিট বাটনের জন্য)
+    // কিন্তু চেক করি যে আগে থেকে নেই কিনা
+    const alreadyInTask = taskStatus.find(t => t.id === clickedTicket.id)
+    if (!alreadyInTask) {
+      setTaskStatus([...taskStatus, clickedTicket])
       setInProgressCount(inProgressCount + 1)
-      toast.success(`✅ Ticket #${ticket.id} added to Task Status!`, {
-        position: "top-right",
-        autoClose: 2000,
-      })
+      toast.success(`✅ Ticket #${clickedTicket.id} added to Task Status`)
     } else {
-      toast.info(`ℹ️ Ticket #${ticket.id} is already in Task Status`, {
-        position: "top-right",
-        autoClose: 2000,
-      })
+      toast.info(`ℹ️ Ticket already in Task Status`)
     }
   }
 
+  // Complete বাটন ক্লিক করলে
   const handleCompleteTask = (ticket) => {
-    // Remove from task status
+    // 1. TaskStatus থেকে রিমুভ
     setTaskStatus(taskStatus.filter(t => t.id !== ticket.id))
 
-    // Add to resolved tickets
-    setResolvedTickets([...resolvedTickets, ticket])
-
-    // Remove from main tickets list
+    // 2. TicketCard থেকে পুরোপুরি রিমুভ
     setTickets(tickets.filter(t => t.id !== ticket.id))
 
-    // Update counts
+    // 3. Resolved লিস্টে যোগ
+    setResolvedTickets([...resolvedTickets, ticket])
+
+    // 4. কাউন্ট আপডেট
     setInProgressCount(inProgressCount - 1)
     setResolvedCount(resolvedCount + 1)
 
-    toast.success(`🎉 Ticket #${ticket.id} marked as Resolved!`, {
-      position: "top-right",
-      autoClose: 2000,
-    })
+    toast.success(`🎉 Ticket #${ticket.id} Resolved!`)
   }
 
   return (
-    <div className='bg-gray-100'>
+    <div className="bg-gray-100 min-h-screen">
       <Navbar />
       <div className="w-11/12 mx-auto">
-        <Banner
-          inProgressCount={inProgressCount}
-          resolvedCount={resolvedCount}
-        />
+        <Banner inProgressCount={inProgressCount} resolvedCount={resolvedCount} />
 
-        <main className="container mx-auto px-4 py-8">
+        <main className="px-4 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Side - Customer Tickets */}
+            {/* বাম পাশে - Ticket Card (status আপডেট হবে, কিন্তু থাকবে) */}
             <div className="lg:col-span-2">
               <h2 className="text-2xl font-bold mb-4">Customer Tickets</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -71,13 +72,13 @@ function App() {
                   <TicketCard
                     key={ticket.id}
                     ticket={ticket}
-                    onAddToTask={handleAddToTask}
+                    onCardClick={handleCardClick}
                   />
                 ))}
               </div>
             </div>
 
-            {/* Right Side - Task Status */}
+            {/* ডান পাশে - Task Status (শুধু Complete বাটন) */}
             <div className="lg:col-span-1">
               <TaskStatus
                 tasks={taskStatus}
@@ -87,7 +88,8 @@ function App() {
             </div>
           </div>
         </main>
-        <ToastContainer />
+
+        <ToastContainer position="top-right" autoClose={2000} />
       </div>
       <Footer />
     </div>
