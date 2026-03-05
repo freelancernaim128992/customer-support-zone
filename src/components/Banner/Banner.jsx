@@ -1,6 +1,6 @@
 const Banner = ({ inProgressCount, resolvedCount }) => {
   return (
-    <div className="bg-white dark:bg-gray-900 py-8">
+    <div className="pt-20 pb-5">
       <div className="">
         {/* Banner Content */}
         <div className="flex items-center gap-6">
