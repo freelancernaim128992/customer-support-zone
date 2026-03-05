@@ -37,4 +37,4 @@ const TicketCard = ({ ticket, onAddToTask }) => {
   )
 }
 
-export default TicketCard
+export default TicketCard;
